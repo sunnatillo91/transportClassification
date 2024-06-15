@@ -75,7 +75,7 @@ import torch
 import pickle
 
 # Custom pickle module to handle WindowsPath
-class CustomPickleModule(pickle.Pickle):
+class CustomPickleModule(pickle.Unpickler):
     def find_class(self, module, name):
         if module == "pathlib" and name == "WindowsPath":
             return pathlib.PosixPath
