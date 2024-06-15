@@ -1,5 +1,7 @@
 import streamlit as st
 from fastai.vision.all import *
+from fastai.vision.all import PILImage
+from fastai.learner import load_learner
 import pathlib
 import plotly
 import plotly.express as px
@@ -8,6 +10,22 @@ import platform
 plt = platform.system()
 if plt == 'Linux': pathlib.WindowsPath = pathlib.WindowsPath
 
+
+import os
+
+model_path = 'transport_model.pkl'
+if not os.path.exists(model_path):
+    print(f"Error: Model file {model_path} does not exist.")
+else:
+    print(f"Model file {model_path} found.")
+
+import torch
+
+try:
+    model = torch.load(model_path, map_location='cpu')
+    print("Model loaded successfully with torch.")
+except Exception as e:
+    print(f"Error loading model with torch: {e}")
 
 
 #title
