@@ -3,6 +3,7 @@ from fastai.vision.all import *
 from fastai.vision.all import PILImage
 from fastai.learner import load_learner
 import pathlib
+from pathlib import Path
 import plotly
 import plotly.express as px
 import platform
@@ -13,7 +14,15 @@ if plt == 'Linux': pathlib.WindowsPath = pathlib.WindowsPath
 
 import os
 
+# Function to convert WindowsPath to PosixPath if needed
+def convert_path(path):
+    if isinstance(path, Path):
+        path = str(path)
+    return path.replace('\\', '/') if os.name != 'nt' else path
+
 model_path = 'transport_model.pkl'
+model_path = convert_path(model_path)
+
 if not os.path.exists(model_path):
     print(f"Error: Model file {model_path} does not exist.")
 else:
