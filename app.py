@@ -74,8 +74,8 @@ import os
 import torch
 import pickle
 
-# Custom pickle module to handle WindowsPath
-class CustomPickleModule(pickle.Unpickler):
+# Custom unpickler to handle WindowsPath
+class CustomUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         if module == "pathlib" and name == "WindowsPath":
             return pathlib.PosixPath
@@ -84,7 +84,7 @@ class CustomPickleModule(pickle.Unpickler):
 # Custom load function using torch.load with custom pickle module
 def custom_load(fname, map_location='cpu'):
     with open(fname, 'rb') as f:
-        return torch.load(f, map_location=map_location, pickle_module=CustomPickleModule)
+        return torch.load(f, map_location=map_location, pickle_module=CustomUnpickler)
 
 # Handle WindowsPath on non-Windows systems
 if platform.system() != 'Windows':
