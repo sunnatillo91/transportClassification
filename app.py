@@ -1,5 +1,6 @@
 import streamlit as st
 from fastai.vision.all import *
+from fastai.vision.all import PILImage
 from fastai.learner import load_learner
 import pathlib
 from pathlib import Path
@@ -28,14 +29,10 @@ if not os.path.exists(model_path):
 else:
     st.success(f"Model file {model_path} found.")
 
-# Try loading the model with torch directly
-try:
-    model = torch.load(model_path, map_location='cpu')
-    st.success("Model loaded successfully with torch.")
-except Exception as e:
-    st.error(f"Error loading model with torch: {e}")
+# Initialize the model variable
+model = None
 
-# Load the model with fastai
+# Try loading the model with fastai
 try:
     model = load_learner(model_path)
     st.success("Model loaded successfully with fastai.")
@@ -53,13 +50,17 @@ if file:
     # Convert uploaded file to PILImage
     img = PILImage.create(file)
     
-    # Predict using the model
-    pred, pred_id, probs = model.predict(img)
-    
-    # Display the prediction and probability
-    st.success(f"Bashorat: {pred}")
-    st.info(f"Ehtimollik: {probs[pred_id]*100:.1f}%")
-    
-    # Plotting the probabilities
-    fig = px.bar(x=probs*100, y=model.dls.vocab, labels={'x': 'Ehtimollik', 'y': 'Sinf'})
-    st.plotly_chart(fig)
+    # Check if the model is loaded before making a prediction
+    if model:
+        # Predict using the model
+        pred, pred_id, probs = model.predict(img)
+        
+        # Display the prediction and probability
+        st.success(f"Bashorat: {pred}")
+        st.info(f"Ehtimollik: {probs[pred_id]*100:.1f}%")
+        
+        # Plotting the probabilities
+        fig = px.bar(x=probs*100, y=model.dls.vocab, labels={'x': 'Ehtimollik', 'y': 'Sinf'})
+        st.plotly_chart(fig)
+    else:
+        st.error("Model is not loaded. Cannot make predictions.")
