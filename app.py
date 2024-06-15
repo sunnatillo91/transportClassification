@@ -66,71 +66,36 @@
 
 import streamlit as st
 from fastai.vision.all import *
+from fastai.vision.all import PILImage
+from fastai.learner import load_learner
 import pathlib
-from pathlib import Path
-import plotly.express as px
+import plotly
 import platform
-import os
-import torch
-import pickle
+import plotly.express as px
 
-# Custom unpickler to handle WindowsPath
-class CustomUnpickler(pickle.Unpickler):
-    def find_class(self, module, name):
-        if module == "pathlib" and name == "WindowsPath":
-            return pathlib.PosixPath
-        return super().find_class(module, name)
+plt = platform.system()
+if plt == 'Linux': pathlib.WindowsPath = pathlib.PosixPath
 
-# Custom load function using torch.load with custom pickle module
-def custom_load(fname, map_location='cpu'):
-    with open(fname, 'rb') as f:
-        return torch.load(f, map_location=map_location, pickle_module=CustomUnpickler)
-
-# Handle WindowsPath on non-Windows systems
-if platform.system() != 'Windows':
-    pathlib.WindowsPath = pathlib.PosixPath
-
-# Model path
-model_path = 'transport_model.pkl'
-
-# Check if the model file exists
-if not os.path.exists(model_path):
-    st.error(f"Model file {model_path} does not exist.")
-else:
-    st.success(f"Model file {model_path} found.")
-
-# Initialize the model variable
-model = None
-
-# Try loading the model with custom unpickler
-try:
-    model = custom_load(model_path)
-    st.success("Model loaded successfully with custom pickle module.")
-except Exception as e:
-    st.error(f"Error loading model with custom pickle module: {e}")
-
-# Streamlit app title
+#title
 st.title("Transportni klassifikatsiya qiluvchi model")
 
-# File uploader for images
+
+# rasmni joylash
 file = st.file_uploader("Rasm yuklash", type=['png', 'jpg', 'gif', 'svg'])
 if file:
     st.image(file)
-    
-    # Convert uploaded file to PILImage
+    # PIL convert
     img = PILImage.create(file)
     
-    # Check if the model is loaded before making a prediction
-    if model:
-        # Predict using the model
-        pred, pred_id, probs = model.predict(img)
-        
-        # Display the prediction and probability
-        st.success(f"Bashorat: {pred}")
-        st.info(f"Ehtimollik: {probs[pred_id]*100:.1f}%")
-        
-        # Plotting the probabilities
-        fig = px.bar(x=probs*100, y=model.dls.vocab, labels={'x': 'Ehtimollik', 'y': 'Sinf'})
-        st.plotly_chart(fig)
-    else:
-        st.error("Model is not loaded. Cannot make predictions.")
+    # modelni yuklash
+    model = load_learner('transport_model.pkl')
+    
+    # bashorat qilish prediction
+    pred, pred_id, probs = model.predict(img)
+    st.success(f"Bashorat: {pred}")
+    st.info(f"Ehtimollik: {probs[pred_id]*100:.1f}%")
+    
+    # plotting
+    
+    fig = px.bar(x= probs*100, y = model.dls.vocab)
+    st.plotly_chart(fig)
