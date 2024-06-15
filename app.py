@@ -83,8 +83,10 @@ def convert_path(path):
         return path
 
 # Handle WindowsPath on non-Windows systems
-if platform.system() != 'Windows':
-    pathlib.WindowsPath = pathlib.PosixPath
+# if platform.system() != 'Windows':
+#     pathlib.WindowsPath = pathlib.PosixPath
+plt = platform.system()
+if plt == 'Linux': pathlib.WindowsPath = pathlib.PosixPath
 
 # Model path
 model_path = 'transport_model.pkl'
