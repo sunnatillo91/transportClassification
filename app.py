@@ -66,7 +66,6 @@
 
 import streamlit as st
 from fastai.vision.all import *
-from fastai.learner import load_learner
 import pathlib
 from pathlib import Path
 import plotly.express as px
@@ -75,19 +74,17 @@ import os
 import torch
 import pickle
 
-# Custom unpickler to handle WindowsPath and persistent IDs
-class CustomUnpickler(pickle.Unpickler):
+# Custom pickle module to handle WindowsPath
+class CustomPickleModule(pickle.Pickle):
     def find_class(self, module, name):
         if module == "pathlib" and name == "WindowsPath":
             return pathlib.PosixPath
         return super().find_class(module, name)
-    
-    def persistent_load(self, pid):
-        return pid
 
+# Custom load function using torch.load with custom pickle module
 def custom_load(fname, map_location='cpu'):
     with open(fname, 'rb') as f:
-        return CustomUnpickler(f).load()
+        return torch.load(f, map_location=map_location, pickle_module=CustomPickleModule)
 
 # Handle WindowsPath on non-Windows systems
 if platform.system() != 'Windows':
@@ -108,9 +105,9 @@ model = None
 # Try loading the model with custom unpickler
 try:
     model = custom_load(model_path)
-    st.success("Model loaded successfully with custom unpickler.")
+    st.success("Model loaded successfully with custom pickle module.")
 except Exception as e:
-    st.error(f"Error loading model with custom unpickler: {e}")
+    st.error(f"Error loading model with custom pickle module: {e}")
 
 # Streamlit app title
 st.title("Transportni klassifikatsiya qiluvchi model")
