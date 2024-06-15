@@ -83,10 +83,8 @@ def convert_path(path):
         return path
 
 # Handle WindowsPath on non-Windows systems
-# if platform.system() != 'Windows':
-#     pathlib.WindowsPath = pathlib.PosixPath
-plt = platform.system()
-if plt == 'Linux': pathlib.WindowsPath = pathlib.PosixPath
+if platform.system() != 'Windows':
+    pathlib.WindowsPath = pathlib.PosixPath
 
 # Model path
 model_path = 'transport_model.pkl'
@@ -118,7 +116,7 @@ if file:
     img = PILImage.create(file)
     
     # Check if the model is loaded before making a prediction
-    if model:
+    if 'model' in locals():
         # Predict using the model
         pred, pred_id, probs = model.predict(img)
         
