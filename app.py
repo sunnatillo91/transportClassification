@@ -75,12 +75,15 @@ import os
 import torch
 import pickle
 
-# Custom unpickler to handle WindowsPath
+# Custom unpickler to handle WindowsPath and persistent IDs
 class CustomUnpickler(pickle.Unpickler):
     def find_class(self, module, name):
         if module == "pathlib" and name == "WindowsPath":
             return pathlib.PosixPath
         return super().find_class(module, name)
+    
+    def persistent_load(self, pid):
+        return pid
 
 def custom_load(fname, map_location='cpu'):
     with open(fname, 'rb') as f:
