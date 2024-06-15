@@ -1,9 +1,26 @@
+import streamlit as st
+from fastai.vision.all import *
+from fastai.learner import load_learner
+import pathlib
+from pathlib import Path
+import plotly.express as px
+import platform
+import os
+import torch
+
 # Handle WindowsPath on non-Windows systems
 if platform.system() != 'Windows':
     pathlib.WindowsPath = pathlib.PosixPath
 
+# Function to convert WindowsPath to PosixPath if needed
+def convert_path(path):
+    if isinstance(path, Path):
+        path = str(path)
+    return path.replace('\\', '/') if os.name != 'nt' else path
+
 # Model path
 model_path = 'transport_model.pkl'
+model_path = convert_path(model_path)
 
 # Check if the model file exists
 if not os.path.exists(model_path):
